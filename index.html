@@ -29,6 +29,7 @@
     }
 
     .player-wrap {
+      position: relative;
       width: 100%;
       height: calc(100vh - 48px);
       background: #000;
@@ -40,6 +41,38 @@
       border: 0;
       display: block;
       background: #000;
+    }
+
+    #clickShield {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.01);
+      cursor: pointer;
+    }
+
+    #shieldMessage {
+      position: absolute;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      z-index: 20;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 14px;
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 0.2s ease;
+    }
+
+    #clickShield.off {
+      pointer-events: none;
+    }
+
+    #shieldMessage.hidden {
+      opacity: 0;
     }
   </style>
 </head>
@@ -55,31 +88,42 @@
       referrerpolicy="strict-origin-when-cross-origin"
       allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
     ></iframe>
+
+    <div id="clickShield"></div>
+    <div id="shieldMessage">Click once to unlock player controls</div>
   </div>
 
   <script>
-    // Blocks popups opened by scripts on YOUR page.
-    // This cannot fully control a cross-origin iframe like VidKing.
+    const shield = document.getElementById("clickShield");
+    const message = document.getElementById("shieldMessage");
+
+    function armShield() {
+      shield.classList.remove("off");
+      message.classList.remove("hidden");
+      message.textContent = "Click once to unlock player controls";
+    }
+
+    function unlockPlayerBriefly() {
+      shield.classList.add("off");
+      message.classList.add("hidden");
+
+      // Gives you a short window to click play / controls.
+      // Then the shield comes back to block ad/popup clicks.
+      setTimeout(() => {
+        armShield();
+      }, 1800);
+    }
+
+    shield.addEventListener("click", unlockPlayerBriefly);
+
+    // Blocks popups from this parent page only.
     window.open = function () {
       console.warn("Popup blocked from parent page");
       return null;
     };
 
-    // Block links on the parent page trying to open new tabs.
-    document.addEventListener("click", function (event) {
-      const link = event.target.closest("a");
-
-      if (!link) return;
-
-      if (link.target === "_blank") {
-        event.preventDefault();
-        console.warn("Blocked parent-page new tab:", link.href);
-      }
-    });
-
-    // If the embedded provider tries to redirect the TOP page,
-    // this can sometimes catch it and bring the user back.
-    let safeUrl = location.href;
+    // Try to stop top-level redirects away from your page.
+    const safeUrl = location.href;
 
     setInterval(() => {
       if (location.href !== safeUrl) {
