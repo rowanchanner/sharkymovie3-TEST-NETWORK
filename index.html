@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Basic Movie Player</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    header {
+      padding: 15px;
+      background: #181818;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .player-wrap {
+      width: 100%;
+      max-width: 1100px;
+      margin: 30px auto;
+      aspect-ratio: 16 / 9;
+      background: black;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <header>Basic Movie Player</header>
+
+  <div class="player-wrap">
+    <iframe
+      id="moviePlayer"
+      src="https://www.vidking.net/embed/movie/936075?color=e50914"
+      allowfullscreen
+      referrerpolicy="strict-origin-when-cross-origin"
+      sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+    ></iframe>
+  </div>
+
+  <script>
+    // Basic popup blocker for anything trying to open from the parent page
+    window.open = function () {
+      console.warn("Popup blocked");
+      return null;
+    };
+
+    // Block common click-jacking style new tabs from parent document
+    document.addEventListener("click", function (e) {
+      const link = e.target.closest("a");
+
+      if (link && link.target === "_blank") {
+        e.preventDefault();
+        console.warn("New tab blocked:", link.href);
+      }
+    });
+  </script>
+
+</body>
+</html>
